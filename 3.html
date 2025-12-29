@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Traffic Analytics Pro - AI Accident Prevention</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%); color: #e5e7eb; min-height: 100vh; }
+        header { background: linear-gradient(135deg, #020617 0%, #0f172a 100%); padding: 40px 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { font-size: 2.5rem; color: #38bdf8; margin-bottom: 10px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.5); }
+        header p { font-size: 1.2rem; opacity: 0.9; }
+        section { background: rgba(2, 6, 23, 0.9); margin: 30px auto; padding: 30px; border-radius: 20px; max-width: 1200px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); backdrop-filter: blur(10px); transition: transform 0.3s ease; }
+        section:hover { transform: translateY(-5px); }
+        h2 { color: #38bdf8; font-size: 1.8rem; margin-bottom: 20px; text-align: center; }
+        .input-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; max-width: 1000px; margin: 0 auto 20px; }
+        input, button, select { padding: 15px; font-size: 1rem; border: none; border-radius: 12px; background: rgba(255,255,255,0.1); color: #e5e7eb; }
+        input::placeholder { color: #94a3b8; }
+        button { background: linear-gradient(135deg, #38bdf8, #0ea5e9); font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        button:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(56,189,248,0.4); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .suggestion-box { background: rgba(34,197,94,0.2); padding: 15px; border-radius: 12px; margin: 10px 0; border-left: 4px solid #22c55e; }
+        .suggestion-box.high { background: rgba(239,68,68,0.2); border-left-color: #ef4444; }
+        .suggestion-box.medium { background: rgba(250,204,21,0.2); border-left-color: #facc15; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; }
+        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #334155; }
+        th { background: linear-gradient(135deg, #38bdf8, #0ea5e9); color: white; font-weight: 600; }
+        .high { color: #ef4444; font-weight: bold; }
+        .medium { color: #facc15; font-weight: bold; }
+        .low { color: #22c55e; font-weight: bold; }
+        .impact { font-size: 0.9rem; opacity: 0.8; }
+        .chart-container { height: 400px; margin: 20px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; text-align: center; }
+        .card i { font-size: 3rem; color: #38bdf8; margin-bottom: 10px; }
+        .priority { position: fixed; top: 20px; right: 20px; background: rgba(239,68,68,0.95); color: white; padding: 20px; border-radius: 12px; max-width: 300px; box-shadow: 0 10px 30px rgba(239,68,68,0.4); z-index: 1000; }
+        .error { background: rgba(239,68,68,0.3); border-left-color: #ef4444; color: #ef4444; }
+        @media (max-width: 768px) { 
+            .input-group, .chart-container { grid-template-columns: 1fr; } 
+            h1 { font-size: 2rem; } 
+            .priority { position: static; margin: 20px; } 
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><i class="fas fa-road"></i> Smart Traffic Analytics Pro</h1>
+        <p>AI-Powered Accident Prevention Recommendations - All Indian States</p>
+    </header>
+
+    <section>
+        <h2><i class="fas fa-plus"></i> Add New Zone Data</h2>
+        <div class="input-group">
+            <select id="state">
+                <option value="">Select State</option>
+                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                <option value="Assam">Assam</option>
+                <option value="Bihar">Bihar</option>
+                <option value="Chhattisgarh">Chhattisgarh</option>
+                <option value="Goa">Goa</option>
+                <option value="Gujarat">Gujarat</option>
+                <option value="Haryana">Haryana</option>
+                <option value="Himachal Pradesh">Himachal Pradesh</option>
+                <option value="Jharkhand">Jharkhand</option>
+                <option value="Karnataka">Karnataka</option>
+                <option value="Kerala">Kerala</option>
+                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                <option value="Maharashtra">Maharashtra</option>
+                <option value="Manipur">Manipur</option>
+                <option value="Meghalaya">Meghalaya</option>
+                <option value="Mizoram">Mizoram</option>
+                <option value="Nagaland">Nagaland</option>
+                <option value="Odisha">Odisha</option>
+                <option value="Punjab">Punjab</option>
+                <option value="Rajasthan">Rajasthan</option>
+                <option value="Sikkim">Sikkim</option>
+                <option value="Tamil Nadu">Tamil Nadu</option>
+                <option value="Telangana">Telangana</option>
+                <option value="Tripura">Tripura</option>
+                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                <option value="Uttarakhand">Uttarakhand</option>
+                <option value="West Bengal">West Bengal</option>
+            </select>
+            <input id="zone" placeholder="Zone e.g., Chennai Hwy">
+            <input id="violations" type="number" min="0" placeholder="Violations">
+            <input id="accidents" type="number" min="0" placeholder="Accidents">
+            <input id="speeding" type="number" min="0" placeholder="Speeding Incidents">
+            <select id="month">
+                <option>Jan 2025</option><option>Feb 2025</option><option>Mar 2025</option><option>Apr 2025</option>
+                <option>May 2025</option><option>Jun 2025</option><option>Jul 2025</option><option>Aug 2025</option>
+                <option>Sep 2025</option><option>Oct 2025</option><option>Nov 2025</option><option>Dec 2025</option>
+            </select>
+            <button id="addBtn" onclick="addZone()"><i class="fas fa-plus"></i> Add Zone</button>
+        </div>
+        <div class="actions">
+            <button onclick="loadSamples()">Load Priority Samples</button>
+            <button onclick="exportData()">Export Action Plan</button>
+        </div>
+        <div id="suggestionPreview" class="suggestion-box" style="display:none;"></div>
+    </section>
+
+    <div id="priorityAlert" class="priority" style="display:none;">
+        <h3><i class="fas fa-exclamation-triangle"></i> Priority Actions</h3>
+        <div id="priorityList"></div>
+    </div>
+
+    <section id="dashboard" style="display: none;">
+        <h2><i class="fas fa-chart-dashboard"></i> AI Accident Prevention Dashboard</h2>
+        <div class="chart-container">
+            <canvas id="riskChart"></canvas>
+            <canvas id="impactChart"></canvas>
+        </div>
+        <table>
+            <thead>
+                <tr><th>Zone</th><th>Violations</th><th>Accidents</th><th>Speeding</th><th>Risk</th><th>AI Recommendations</th><th>Est. Impact</th><th>Priority</th></tr>
+            </thead>
+            <tbody id="zonesTable"></tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2><i class="fas fa-info-circle"></i> Prevention Impact Stats</h2>
+        <div class="stats-grid">
+            <div class="card"><i class="fas fa-chart-line"></i><h3 id="totalZones">0</h3><p>Total Zones</p></div>
+            <div class="card"><i class="fas fa-exclamation-triangle"></i><h3 id="highRisk">0</h3><p>Critical Zones</p></div>
+            <div class="card high"><i class="fas fa-bolt"></i><h3 id="priorityActions">0</h3><p>Immediate Actions</p></div>
+            <div class="card"><i class="fas fa-percentage"></i><h3 id="totalImpact">0%</h3><p>Potential Reduction</p></div>
+        </div>
+    </section>
+
+    <script>
+        class TrafficAnalytics {
+            constructor() {
+                this.zones = JSON.parse(localStorage.getItem('zones') || '[]');
+                this.chart1 = null;
+                this.chart2 = null;
+                this.cache = { highRisk: 0, critical: 0, totalImpact: 0 };
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.updateDashboard();
+            }
+
+            bindEvents() {
+                const inputs = ['state', 'zone', 'violations', 'accidents', 'speeding'];
+                inputs.forEach(id => {
+                    document.getElementById(id).addEventListener('input', this.validateForm.bind(this));
+                });
+            }
+
+            validateForm() {
+                const state = document.getElementById('state').value;
+                const zone = document.getElementById('zone').value;
+                const v = parseInt(document.getElementById('violations').value) || 0;
+                const a = parseInt(document.getElementById('accidents').value) || 0;
+                const s = parseInt(document.getElementById('speeding').value) || 0;
+                const btn = document.getElementById('addBtn');
+                btn.disabled = !state || !zone || v <= 0 || a < 0 || s < 0;
+            }
+
+            calculateRisk(v, a, s) {
+                const score = (v * 0.4 + a * 0.4 + s * 0.2) / 10;
+                if (score >= 8) return { risk: 'HIGH', cls: 'high' };
+                if (score >= 4) return { risk: 'MEDIUM', cls: 'medium' };
+                return { risk: 'LOW', cls: 'low' };
+            }
+
+            getAIRecommendations(risk, v, a, s) {
+                const recs = [...AI_RECOMMENDATIONS[risk]];
+                if (s / (v || 1) > 0.5) recs[0].priority = 'CRITICAL';
+                if (a / (v || 1) > 0.3) recs[1].priority = 'CRITICAL';
+                return recs.slice(0, 3);
+            }
+
+            addZone() {
+                const state = document.getElementById('state').value;
+                const zone = document.getElementById('zone').value.trim();
+                const v = parseInt(document.getElementById('violations').value);
+                const a = parseInt(document.getElementById('accidents').value);
+                const s = parseInt(document.getElementById('speeding').value);
+                const month = document.getElementById('month').value;
+
+                if (!state || !zone || isNaN(v) || isNaN(a) || isNaN(s) || v <= 0) {
+                    this.showError('Please fill all fields with valid numbers');
+                    return;
+                }
+
+                const fullZone = `${state} - ${zone}`;
+                const riskData = this.calculateRisk(v, a, s);
+                const recommendations = this.getAIRecommendations(riskData.risk, v, a, s);
+                const totalImpact = recommendations.reduce((sum, r) => sum + r.impact, 0);
+
+                this.zones.push({ zone: fullZone, violations: v, accidents: a, speeding: s, ...riskData, recommendations, totalImpact, month });
+                localStorage.setItem('zones', JSON.stringify(this.zones));
+                
+                document.getElementById('dashboard').style.display = 'block';
+                this.clearForm();
+                this.updateDashboard();
+            }
+
+            clearForm() {
+                ['state', 'zone', 'violations', 'accidents', 'speeding'].forEach(id => {
+                    document.getElementById(id).value = '';
+                });
+                document.getElementById('addBtn').disabled = true;
+            }
+
+            showError(msg) {
+                const preview = document.getElementById('suggestionPreview');
+                preview.textContent = msg;
+                preview.className = 'suggestion-box error';
+                preview.style.display = 'block';
+                setTimeout(() => preview.style.display = 'none', 3000);
+            }
+
+            updateDashboard() {
+                this.updateTable();
+                this.updateStats();
+                this.updatePriorityAlert();
+                this.updateCharts();
+            }
+
+            updateTable() {
+                const tbody = document.getElementById('zonesTable');
+                const fragment = document.createDocumentFragment();
+                const rows = this.zones.slice(0, 50).map(zone => {
+                    const topRec = zone.recommendations[0];
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${zone.zone}</td>
+                        <td>${zone.violation}</td>
+                        <td>${zone.accidents}</td>
+                        <td>${zone.speeding}</td>
+                        <td class="${zone.cls}">${zone.risk}</td>
+                        <td><strong>${topRec.action}</strong><br><span class="impact">${topRec.time}</span></td>
+                        <td><strong>${zone.totalImpact}%</strong></td>
+                        <td><span class="${topRec.priority.toLowerCase()}">${topRec.priority}</span></td>
+                    `;
+                    return tr;
+                });
+                rows.forEach(tr => fragment.appendChild(tr));
+                tbody.innerHTML = '';
+                tbody.appendChild(fragment);
+            }
+
+            updateStats() {
+                const highRiskZones = this.zones.filter(z => z.risk === 'HIGH');
+                const criticalZones = highRiskZones.filter(z => z.recommendations[0].priority === 'CRITICAL');
+                const avgImpact = Math.round(this.zones.reduce((sum, z) => sum + z.totalImpact, 0) / Math.max(this.zones.length, 1));
+
+                document.getElementById('totalZones').textContent = this.zones.length;
+                document.getElementById('highRisk').textContent = highRiskZones.length;
+                document.getElementById('priorityActions').textContent = criticalZones.length;
+                document.getElementById('totalImpact').textContent = avgImpact + '%';
+            }
+
+            updatePriorityAlert() {
+                const criticalZones = this.zones.filter(z => z.recommendations[0].priority === 'CRITICAL');
+                const list = document.getElementById('priorityList');
+                if (criticalZones.length > 0) {
+                    list.innerHTML = criticalZones.slice(0, 5).map(z => 
+                        `<div><strong>${z.zone}</strong>: ${z.recommendations[0].action} (${z.recommendations[0].impact}%)</div>`
+                    ).join('');
+                    document.getElementById('priorityAlert').style.display = 'block';
+                } else {
+                    document.getElementById('priorityAlert').style.display = 'none';
+                }
+            }
+
+            updateCharts() {
+                const riskCtx = document.getElementById('riskChart').getContext('2d');
+                const impactCtx = document.getElementById('impactChart').getContext('2d');
+
+                if (this.chart1) this.chart1.destroy();
+                this.chart1 = new Chart(riskCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['HIGH Risk', 'MEDIUM Risk', 'LOW Risk'],
+                        datasets: [{
+                            data: [
+                                this.zones.filter(z => z.risk === 'HIGH').length,
+                                this.zones.filter(z => z.risk === 'MEDIUM').length,
+                                this.zones.filter(z => z.risk === 'LOW').length
+                            ],
+                            backgroundColor: ['#ef4444', '#facc15', '#22c55e']
+                        }]
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom', labels: { color: '#e5e7eb' } } }
+                    }
+                });
+
+                if (this.chart2) this.chart2.destroy();
+                this.chart2 = new Chart(impactCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: this.zones.slice(0, 10).map(z => z.zone.slice(0,15) + '...'),
+                        datasets: [{
+                            label: 'Est. Impact %',
+                            data: this.zones.slice(0, 10).map(z => z.totalImpact),
+                            backgroundColor: this.zones.slice(0, 10).map(z => z.cls === 'high' ? '#ef4444' : '#38bdf8')
+                        }]
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
+
+            loadSamples() {
+                const state = document.getElementById('state').value || 'Haryana';
+                this.zones = [
+                    { zone: `${state} - Emergency Hwy`, violations: 150, accidents: 25, speeding: 120, risk: 'HIGH', cls: 'high', recommendations: AI_RECOMMENDATIONS.HIGH, totalImpact: 135, month: 'Dec 2025' },
+                    { zone: `${state} - Urban Rd`, violations: 80, accidents: 12, speeding: 50, risk: 'MEDIUM', cls: 'medium', recommendations: AI_RECOMMENDATIONS.MEDIUM, totalImpact: 63, month: 'Dec 2025' },
+                    { zone: `${state} - Rural Bypass`, violations: 25, accidents: 2, speeding: 15, risk: 'LOW', cls: 'low', recommendations: AI_RECOMMENDATIONS.LOW, totalImpact: 18, month: 'Dec 2025' }
+                ];
+                localStorage.setItem('zones', JSON.stringify(this.zones));
+                this.updateDashboard();
+            }
+
+            exportData() {
+                const csv = 'Zone,Risk,Top Recommendation,Est Impact %,Priority\n' + 
+                    this.zones.map(z => 
+                        `"${z.zone.replace(/"/g, '""')}","${z.risk}","${z.recommendations[0].action.replace(/"/g, '""')}","${z.totalImpact}","${z.recommendations[0].priority}"`
+                    ).join('\n');
+                const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], { type: 'text/csv;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; 
+                a.download = `accident_prevention_${new Date().toISOString().slice(0,10)}.csv`; 
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        const AI_RECOMMENDATIONS = {
+            HIGH: [
+                { action: 'Install AI Speed Cameras (24x7)', impact: 45, time: '1 week', priority: 'CRITICAL' },
+                { action: 'Deploy Dedicated Patrol Teams', impact: 35, time: 'Immediate', priority: 'HIGH' },
+                { action: 'Emergency Road Resurfacing', impact: 25, time: '2 weeks', priority: 'HIGH' },
+                { action: 'AI Predictive Hotspot Monitoring', impact: 30, time: '3 days', priority: 'MEDIUM' }
+            ],
+            MEDIUM: [
+                { action: 'Install Warning Signage + Rumblers', impact: 25, time: '1 week', priority: 'MEDIUM' },
+                { action: 'Traffic Signal Optimization', impact: 20, time: '2 weeks', priority: 'MEDIUM' },
+                { action: 'Speed Feedback Displays', impact: 18, time: '5 days', priority: 'LOW' },
+                { action: 'Enhanced Road Markings', impact: 15, time: '1 week', priority: 'LOW' }
+            ],
+            LOW: [
+                { action: 'Routine Monitoring + Data Collection', impact: 10, time: 'Ongoing', priority: 'LOW' },
+                { action: 'Community Awareness Campaigns', impact: 8, time: 'Monthly', priority: 'LOW' }
+            ]
+        };
+
+        // Initialize app
+        const app = new TrafficAnalytics();
+
+        // Expose methods globally for onclick handlers
+        window.addZone = () => app.addZone();
+        window.loadSamples = () => app.loadSamples();
+        window.exportData = () => app.exportData();
+    </script>
+</body>
+</html>
