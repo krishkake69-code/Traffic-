@@ -3,165 +3,941 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Traffic Analytics Pro - AI Accident Prevention</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>Smart Traffic Analytics Pro - AI 3D Prevention Hub</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- ChartJS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- ThreeJS & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%); color: #e5e7eb; min-height: 100vh; }
-        header { background: linear-gradient(135deg, #020617 0%, #0f172a 100%); padding: 40px 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h1 { font-size: 2.5rem; color: #38bdf8; margin-bottom: 10px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.5); }
-        header p { font-size: 1.2rem; opacity: 0.9; }
-        section { background: rgba(2, 6, 23, 0.9); margin: 30px auto; padding: 30px; border-radius: 20px; max-width: 1200px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); backdrop-filter: blur(10px); transition: transform 0.3s ease; }
-        section:hover { transform: translateY(-5px); }
-        h2 { color: #38bdf8; font-size: 1.8rem; margin-bottom: 20px; text-align: center; }
-        .input-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; max-width: 1000px; margin: 0 auto 20px; }
-        input, button, select { padding: 15px; font-size: 1rem; border: none; border-radius: 12px; background: rgba(255,255,255,0.1); color: #e5e7eb; }
-        input::placeholder { color: #94a3b8; }
-        button { background: linear-gradient(135deg, #38bdf8, #0ea5e9); font-weight: 600; cursor: pointer; transition: all 0.3s; }
-        button:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(56,189,248,0.4); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .suggestion-box { background: rgba(34,197,94,0.2); padding: 15px; border-radius: 12px; margin: 10px 0; border-left: 4px solid #22c55e; }
-        .suggestion-box.high { background: rgba(239,68,68,0.2); border-left-color: #ef4444; }
-        .suggestion-box.medium { background: rgba(250,204,21,0.2); border-left-color: #facc15; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; }
-        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #334155; }
-        th { background: linear-gradient(135deg, #38bdf8, #0ea5e9); color: white; font-weight: 600; }
-        .high { color: #ef4444; font-weight: bold; }
-        .medium { color: #facc15; font-weight: bold; }
-        .low { color: #22c55e; font-weight: bold; }
-        .impact { font-size: 0.9rem; opacity: 0.8; }
-        .chart-container { height: 400px; margin: 20px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; text-align: center; }
-        .card i { font-size: 3rem; color: #38bdf8; margin-bottom: 10px; }
-        .priority { position: fixed; top: 20px; right: 20px; background: rgba(239,68,68,0.95); color: white; padding: 20px; border-radius: 12px; max-width: 300px; box-shadow: 0 10px 30px rgba(239,68,68,0.4); z-index: 1000; }
-        .error { background: rgba(239,68,68,0.3); border-left-color: #ef4444; color: #ef4444; }
-        @media (max-width: 768px) { 
-            .input-group, .chart-container { grid-template-columns: 1fr; } 
-            h1 { font-size: 2rem; } 
-            .priority { position: static; margin: 20px; } 
+        :root {
+            --bg-base: #030712;
+            --panel-bg: rgba(17, 24, 39, 0.7);
+            --border-glow: rgba(56, 189, 248, 0.2);
+            --border-glow-focus: rgba(56, 189, 248, 0.6);
+            --accent-primary: #38bdf8;
+            --accent-secondary: #c084fc;
+            --neon-green: #10b981;
+            --neon-yellow: #f59e0b;
+            --neon-red: #f43f5e;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Space Grotesk', sans-serif;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-glow) transparent;
+        }
+
+        /* Custom Scrollbar */
+        *::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        *::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        *::-webkit-scrollbar-thumb {
+            background-color: var(--border-glow);
+            border-radius: 20px;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(14, 165, 233, 0.15) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(244, 63, 94, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Header Style */
+        header {
+            background: rgba(3, 7, 18, 0.6);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-glow);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon-wrapper {
+            position: relative;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+            animation: pulse-glow 2s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); }
+            100% { box-shadow: 0 0 25px rgba(192, 132, 252, 0.6); }
+        }
+
+        .logo-icon-wrapper i {
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        header h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Action Buttons */
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glow);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn:hover {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), #0284c7);
+            border: none;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 25px rgba(56, 189, 248, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Main Dashboard Grid */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 25px;
+            max-width: 1600px;
+            margin: 25px auto;
+            padding: 0 25px;
+        }
+
+        /* Glassmorphic Panel Cards */
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 24px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .panel:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+        }
+
+        .panel-title i {
+            color: var(--accent-primary);
+        }
+
+        /* Input Controls */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-glow);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        /* Dynamic Preview in Input Form */
+        .live-preview {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed var(--border-glow);
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Sidebar Zone List */
+        .zone-list {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 380px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .zone-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .zone-item:hover {
+            background: rgba(56, 189, 248, 0.05);
+            border-color: var(--border-glow-focus);
+            transform: translateX(3px);
+        }
+
+        .zone-item.active {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+        }
+
+        .zone-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .zone-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .zone-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* 3D Canvas Box */
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: #020617;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border-glow);
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        #three-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 8px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border-glow);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--neon-green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-green);
+            animation: blink 1s infinite alternate;
+        }
+
+        @keyframes blink {
+            from { opacity: 0.3; } to { opacity: 1; }
+        }
+
+        .canvas-controls {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .control-btn {
+            background: rgba(3, 7, 18, 0.85);
+            border: 1px solid var(--border-glow);
+            color: #fff;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .control-btn:hover, .control-btn.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+            color: #000;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: 14px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: transparent;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .stat-card.blue::after { background: var(--accent-primary); }
+        .stat-card.red::after { background: var(--neon-red); }
+        .stat-card.yellow::after { background: var(--neon-yellow); }
+        .stat-card.green::after { background: var(--neon-green); }
+
+        .stat-card i {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .stat-card.blue i { color: var(--accent-primary); }
+        .stat-card.red i { color: var(--neon-red); }
+        .stat-card.yellow i { color: var(--neon-yellow); }
+        .stat-card.green i { color: var(--neon-green); }
+
+        .stat-card h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 2px;
+        }
+
+        .stat-card p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Right Side Content Grid */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .visualizer-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        /* Charts Layout */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .chart-box {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 16px;
+            height: 250px;
+            position: relative;
+        }
+
+        /* Recommendations & Priority Alerts */
+        .recs-alert-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .rec-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .rec-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: 0 10px 10px 0;
+            padding: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .rec-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .rec-item.critical { border-left-color: var(--neon-red); }
+        .rec-item.high { border-left-color: var(--neon-yellow); }
+        .rec-item.medium { border-left-color: var(--accent-secondary); }
+        .rec-item.low { border-left-color: var(--neon-green); }
+
+        .rec-content h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .rec-content p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .rec-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .rec-badge.critical { background: rgba(244, 63, 94, 0.15); color: var(--neon-red); }
+        .rec-badge.high { background: rgba(245, 158, 11, 0.15); color: var(--neon-yellow); }
+        .rec-badge.medium { background: rgba(192, 132, 252, 0.15); color: var(--accent-secondary); }
+        .rec-badge.low { background: rgba(16, 185, 129, 0.15); color: var(--neon-green); }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.88rem;
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.8);
+            font-weight: 600;
+            color: var(--accent-primary);
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        /* Risk Pill Styles */
+        .risk-pill {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .risk-pill.high { background: rgba(244, 63, 94, 0.15); color: var(--neon-red); }
+        .risk-pill.medium { background: rgba(245, 158, 11, 0.15); color: var(--neon-yellow); }
+        .risk-pill.low { background: rgba(16, 185, 129, 0.15); color: var(--neon-green); }
+
+        /* Action bar for loading samples */
+        .actions-panel {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .notification-toast {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--accent-primary);
+            padding: 15px 25px;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.5);
+            animation: slide-in 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        @keyframes slide-in {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Responsiveness */
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
 <body>
     <header>
-        <h1><i class="fas fa-road"></i> Smart Traffic Analytics Pro</h1>
-        <p>AI-Powered Accident Prevention Recommendations - All Indian States</p>
+        <div class="logo-container">
+            <div class="logo-icon-wrapper">
+                <i class="fas fa-microchip"></i>
+            </div>
+            <div>
+                <h1>Smart Traffic Analytics Pro</h1>
+                <p>Interactive 3D Simulation & AI Safety Portal</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn" onclick="app.loadSamples()"><i class="fas fa-folder-open"></i> Load Priority Samples</button>
+            <button class="btn btn-primary" onclick="app.exportData()"><i class="fas fa-file-export"></i> Export CSV Action Plan</button>
+        </div>
     </header>
 
-    <section>
-        <h2><i class="fas fa-plus"></i> Add New Zone Data</h2>
-        <div class="input-group">
-            <select id="state">
-                <option value="">Select State</option>
-                <option value="Andhra Pradesh">Andhra Pradesh</option>
-                <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-                <option value="Assam">Assam</option>
-                <option value="Bihar">Bihar</option>
-                <option value="Chhattisgarh">Chhattisgarh</option>
-                <option value="Goa">Goa</option>
-                <option value="Gujarat">Gujarat</option>
-                <option value="Haryana">Haryana</option>
-                <option value="Himachal Pradesh">Himachal Pradesh</option>
-                <option value="Jharkhand">Jharkhand</option>
-                <option value="Karnataka">Karnataka</option>
-                <option value="Kerala">Kerala</option>
-                <option value="Madhya Pradesh">Madhya Pradesh</option>
-                <option value="Maharashtra">Maharashtra</option>
-                <option value="Manipur">Manipur</option>
-                <option value="Meghalaya">Meghalaya</option>
-                <option value="Mizoram">Mizoram</option>
-                <option value="Nagaland">Nagaland</option>
-                <option value="Odisha">Odisha</option>
-                <option value="Punjab">Punjab</option>
-                <option value="Rajasthan">Rajasthan</option>
-                <option value="Sikkim">Sikkim</option>
-                <option value="Tamil Nadu">Tamil Nadu</option>
-                <option value="Telangana">Telangana</option>
-                <option value="Tripura">Tripura</option>
-                <option value="Uttar Pradesh">Uttar Pradesh</option>
-                <option value="Uttarakhand">Uttarakhand</option>
-                <option value="West Bengal">West Bengal</option>
-            </select>
-            <input id="zone" placeholder="Zone e.g., Chennai Hwy">
-            <input id="violations" type="number" min="0" placeholder="Violations">
-            <input id="accidents" type="number" min="0" placeholder="Accidents">
-            <input id="speeding" type="number" min="0" placeholder="Speeding Incidents">
-            <select id="month">
-                <option>Jan 2025</option><option>Feb 2025</option><option>Mar 2025</option><option>Apr 2025</option>
-                <option>May 2025</option><option>Jun 2025</option><option>Jul 2025</option><option>Aug 2025</option>
-                <option>Sep 2025</option><option>Oct 2025</option><option>Nov 2025</option><option>Dec 2025</option>
-            </select>
-            <button id="addBtn" onclick="addZone()"><i class="fas fa-plus"></i> Add Zone</button>
-        </div>
-        <div class="actions">
-            <button onclick="loadSamples()">Load Priority Samples</button>
-            <button onclick="exportData()">Export Action Plan</button>
-        </div>
-        <div id="suggestionPreview" class="suggestion-box" style="display:none;"></div>
-    </section>
+    <div class="dashboard-container">
+        <!-- Sidebar Controls -->
+        <aside class="panel" style="display: flex; flex-direction: column; gap: 20px;">
+            <div>
+                <h2 class="panel-title"><i class="fas fa-plus-circle"></i> Add Zone Data</h2>
+                <div class="form-group">
+                    <label for="state">State</label>
+                    <select id="state">
+                        <option value="">Select State</option>
+                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                        <option value="Assam">Assam</option>
+                        <option value="Bihar">Bihar</option>
+                        <option value="Chhattisgarh">Chhattisgarh</option>
+                        <option value="Goa">Goa</option>
+                        <option value="Gujarat">Gujarat</option>
+                        <option value="Haryana">Haryana</option>
+                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                        <option value="Jharkhand">Jharkhand</option>
+                        <option value="Karnataka">Karnataka</option>
+                        <option value="Kerala">Kerala</option>
+                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                        <option value="Maharashtra">Maharashtra</option>
+                        <option value="Manipur">Manipur</option>
+                        <option value="Meghalaya">Meghalaya</option>
+                        <option value="Mizoram">Mizoram</option>
+                        <option value="Nagaland">Nagaland</option>
+                        <option value="Odisha">Odisha</option>
+                        <option value="Punjab">Punjab</option>
+                        <option value="Rajasthan">Rajasthan</option>
+                        <option value="Sikkim">Sikkim</option>
+                        <option value="Tamil Nadu">Tamil Nadu</option>
+                        <option value="Telangana">Telangana</option>
+                        <option value="Tripura">Tripura</option>
+                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                        <option value="Uttarakhand">Uttarakhand</option>
+                        <option value="West Bengal">West Bengal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="zone">Zone / Highway Name</label>
+                    <input id="zone" placeholder="e.g. NH-48 Express Link">
+                </div>
+                <div class="form-group">
+                    <label for="violations">Violations / Month</label>
+                    <input id="violations" type="number" min="0" placeholder="e.g. 150">
+                </div>
+                <div class="form-group">
+                    <label for="accidents">Accidents / Month</label>
+                    <input id="accidents" type="number" min="0" placeholder="e.g. 12">
+                </div>
+                <div class="form-group">
+                    <label for="speeding">Speeding Incidents / Month</label>
+                    <input id="speeding" type="number" min="0" placeholder="e.g. 80">
+                </div>
+                <div class="form-group">
+                    <label for="month">Month</label>
+                    <select id="month">
+                        <option>Jan 2026</option><option>Feb 2026</option><option>Mar 2026</option><option selected>Apr 2026</option>
+                        <option>May 2026</option><option>Jun 2026</option><option>Jul 2026</option><option>Aug 2026</option>
+                        <option>Sep 2026</option><option>Oct 2026</option><option>Nov 2026</option><option>Dec 2026</option>
+                    </select>
+                </div>
+                
+                <div class="live-preview" id="livePreviewBox">
+                    <span>Live Risk Estimate:</span>
+                    <span id="liveRiskLabel" class="risk-pill low">LOW</span>
+                </div>
+                
+                <button id="addBtn" class="btn btn-primary" onclick="app.addZone()" style="width: 100%; margin-top: 15px; justify-content: center;" disabled>
+                    <i class="fas fa-plus"></i> Add Zone to Portal
+                </button>
+            </div>
 
-    <div id="priorityAlert" class="priority" style="display:none;">
-        <h3><i class="fas fa-exclamation-triangle"></i> Priority Actions</h3>
-        <div id="priorityList"></div>
+            <!-- List of Zones -->
+            <div style="flex-grow: 1;">
+                <h2 class="panel-title" style="margin-bottom: 10px;"><i class="fas fa-map-marked-alt"></i> Safety Zones</h2>
+                <div class="zone-list" id="sidebarZoneList">
+                    <!-- Dynamic -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Dashboard View -->
+        <main class="main-content">
+            <!-- 3D simulation Viewport -->
+            <div class="panel" style="padding: 16px;">
+                <div class="canvas-container">
+                    <div class="canvas-overlay">
+                        <div class="live-dot"></div>
+                        <span id="canvasZoneName" style="font-weight: 700; color: #fff;">No Zone Selected</span>
+                        <span style="color: var(--text-muted);">| 3D Simulation Engine</span>
+                    </div>
+                    
+                    <div class="canvas-controls">
+                        <button class="control-btn active" onclick="app.setCameraView('orbit')" title="Orbit Camera"><i class="fas fa-globe"></i></button>
+                        <button class="control-btn" onclick="app.setCameraView('follow')" title="Follow Vehicle View"><i class="fas fa-car-side"></i></button>
+                        <button class="control-btn" onclick="app.setCameraView('top')" title="Overhead Traffic Cam"><i class="fas fa-video"></i></button>
+                        <button class="control-btn" onclick="app.toggleDayNight()" title="Toggle Day/Night View"><i class="fas fa-moon"></i></button>
+                    </div>
+                    <div id="three-canvas"></div>
+                </div>
+
+                <!-- Stats summary Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card blue">
+                        <i class="fas fa-road"></i>
+                        <h3 id="totalZones">0</h3>
+                        <p>Total Zones Tracked</p>
+                    </div>
+                    <div class="stat-card red">
+                        <i class="fas fa-radiation"></i>
+                        <h3 id="highRisk">0</h3>
+                        <p>Critical Hotspots</p>
+                    </div>
+                    <div class="stat-card yellow">
+                        <i class="fas fa-shield-halved"></i>
+                        <h3 id="priorityActions">0</h3>
+                        <p>Active High Alerts</p>
+                    </div>
+                    <div class="stat-card green">
+                        <i class="fas fa-gauge-simple-high"></i>
+                        <h3 id="totalImpact">0%</h3>
+                        <p>Avg Safety Potential</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Panels (Charts & Recommendations) -->
+            <div class="recs-alert-grid">
+                <div class="panel">
+                    <h2 class="panel-title"><i class="fas fa-microchip-ai"></i> AI Safety Recommendations & Action Plan</h2>
+                    <div class="rec-container" id="recommendationList">
+                        <!-- Dynamic Recs -->
+                        <div style="color: var(--text-muted); text-align: center; padding: 20px;">
+                            Select or Add a zone to view intelligent accident prevention recommendations.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="panel">
+                    <h2 class="panel-title"><i class="fas fa-chart-pie"></i> Risk Breakdown</h2>
+                    <div class="chart-box">
+                        <canvas id="riskChart"></canvas>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h2 class="panel-title"><i class="fas fa-chart-bar"></i> Hotspot Safety Margin %</h2>
+                    <div class="chart-box">
+                        <canvas id="impactChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Table panel -->
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-database"></i> Smart Portal Grid</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Zone Details</th>
+                                <th>Violations</th>
+                                <th>Accidents</th>
+                                <th>Speeding Incidents</th>
+                                <th>Risk Index</th>
+                                <th>Safety Impact</th>
+                                <th>Top Recommendation</th>
+                            </tr>
+                        </thead>
+                        <tbody id="zonesTable">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">No records found. Click "Load Priority Samples" to start.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <section id="dashboard" style="display: none;">
-        <h2><i class="fas fa-chart-dashboard"></i> AI Accident Prevention Dashboard</h2>
-        <div class="chart-container">
-            <canvas id="riskChart"></canvas>
-            <canvas id="impactChart"></canvas>
-        </div>
-        <table>
-            <thead>
-                <tr><th>Zone</th><th>Violations</th><th>Accidents</th><th>Speeding</th><th>Risk</th><th>AI Recommendations</th><th>Est. Impact</th><th>Priority</th></tr>
-            </thead>
-            <tbody id="zonesTable"></tbody>
-        </table>
-    </section>
-
-    <section>
-        <h2><i class="fas fa-info-circle"></i> Prevention Impact Stats</h2>
-        <div class="stats-grid">
-            <div class="card"><i class="fas fa-chart-line"></i><h3 id="totalZones">0</h3><p>Total Zones</p></div>
-            <div class="card"><i class="fas fa-exclamation-triangle"></i><h3 id="highRisk">0</h3><p>Critical Zones</p></div>
-            <div class="card high"><i class="fas fa-bolt"></i><h3 id="priorityActions">0</h3><p>Immediate Actions</p></div>
-            <div class="card"><i class="fas fa-percentage"></i><h3 id="totalImpact">0%</h3><p>Potential Reduction</p></div>
-        </div>
-    </section>
+    <!-- Notification Toast -->
+    <div id="toast" class="notification-toast">
+        <i class="fas fa-bell" style="color: var(--accent-primary);"></i>
+        <span id="toast-message">Action Complete</span>
+    </div>
 
     <script>
+        // Global recommendations library
+        const AI_RECOMMENDATIONS = {
+            HIGH: [
+                { action: 'Install AI-based Speed Cameras (24x7)', impact: 45, time: 'Deployment: 1 week', priority: 'CRITICAL' },
+                { action: 'Deploy Dedicated Traffic Patrol Cruisers', impact: 35, time: 'Deployment: Immediate', priority: 'CRITICAL' },
+                { action: 'Install Dynamic LED Rumbler warning strips', impact: 25, time: 'Construction: 1 week', priority: 'HIGH' },
+                { action: 'Initiate AI Predictive Corridor monitoring', impact: 30, time: 'System Upgrade: 3 days', priority: 'MEDIUM' }
+            ],
+            MEDIUM: [
+                { action: 'Add Rumbler Strips & Dynamic Signage', impact: 25, time: 'Installation: 1 week', priority: 'HIGH' },
+                { action: 'Optimize Automated Signal Intervals', impact: 20, time: 'Calibration: 3 days', priority: 'MEDIUM' },
+                { action: 'Deploy Speed Feedback Radar display boards', impact: 18, time: 'Installation: 5 days', priority: 'MEDIUM' },
+                { action: 'Revamp High-Visibility Road Markings', impact: 15, time: 'Repainting: 1 week', priority: 'LOW' }
+            ],
+            LOW: [
+                { action: 'Routine Drone Safety Monitoring & analytics', impact: 10, time: 'Standard Schedule', priority: 'LOW' },
+                { action: 'Organize Local Road Safety campaigns', impact: 8, time: 'Monthly Cycle', priority: 'LOW' }
+            ]
+        };
+
         class TrafficAnalytics {
             constructor() {
                 this.zones = JSON.parse(localStorage.getItem('zones') || '[]');
+                this.selectedIndex = this.zones.length > 0 ? 0 : -1;
                 this.chart1 = null;
                 this.chart2 = null;
-                this.cache = { highRisk: 0, critical: 0, totalImpact: 0 };
+                
+                // Three.js State variables
+                this.three = {
+                    scene: null,
+                    camera: null,
+                    renderer: null,
+                    controls: null,
+                    cars: [],
+                    road: null,
+                    isNight: true,
+                    cameraMode: 'orbit', // orbit, follow, top
+                    dirLight: null,
+                    ambientLight: null,
+                    policeFlashing: false,
+                    policeLightTimer: 0,
+                    policeLights: [],
+                    hazardZones: []
+                };
+
                 this.init();
             }
 
             init() {
                 this.bindEvents();
+                this.initThree();
                 this.updateDashboard();
+                this.animate();
+
+                // Setup resize listener
+                window.addEventListener('resize', () => {
+                    if (this.three.renderer && this.three.camera) {
+                        const container = document.getElementById('three-canvas');
+                        const width = container.clientWidth;
+                        const height = container.clientHeight;
+                        this.three.camera.aspect = width / height;
+                        this.three.camera.updateProjectionMatrix();
+                        this.three.renderer.setSize(width, height);
+                    }
+                });
             }
 
             bindEvents() {
                 const inputs = ['state', 'zone', 'violations', 'accidents', 'speeding'];
                 inputs.forEach(id => {
-                    document.getElementById(id).addEventListener('input', this.validateForm.bind(this));
+                    document.getElementById(id).addEventListener('input', () => {
+                        this.validateForm();
+                        this.updateLivePreview();
+                    });
                 });
             }
 
             validateForm() {
                 const state = document.getElementById('state').value;
-                const zone = document.getElementById('zone').value;
+                const zone = document.getElementById('zone').value.trim();
                 const v = parseInt(document.getElementById('violations').value) || 0;
                 const a = parseInt(document.getElementById('accidents').value) || 0;
                 const s = parseInt(document.getElementById('speeding').value) || 0;
                 const btn = document.getElementById('addBtn');
                 btn.disabled = !state || !zone || v <= 0 || a < 0 || s < 0;
+            }
+
+            updateLivePreview() {
+                const v = parseInt(document.getElementById('violations').value) || 0;
+                const a = parseInt(document.getElementById('accidents').value) || 0;
+                const s = parseInt(document.getElementById('speeding').value) || 0;
+                const score = (v * 0.4 + a * 0.4 + s * 0.2) / 10;
+                
+                const label = document.getElementById('liveRiskLabel');
+                if (score >= 8) {
+                    label.textContent = 'HIGH';
+                    label.className = 'risk-pill high';
+                } else if (score >= 4) {
+                    label.textContent = 'MEDIUM';
+                    label.className = 'risk-pill medium';
+                } else {
+                    label.textContent = 'LOW';
+                    label.className = 'risk-pill low';
+                }
             }
 
             calculateRisk(v, a, s) {
@@ -175,7 +951,7 @@
                 const recs = [...AI_RECOMMENDATIONS[risk]];
                 if (s / (v || 1) > 0.5) recs[0].priority = 'CRITICAL';
                 if (a / (v || 1) > 0.3) recs[1].priority = 'CRITICAL';
-                return recs.slice(0, 3);
+                return recs.slice(0, 4);
             }
 
             addZone() {
@@ -187,7 +963,7 @@
                 const month = document.getElementById('month').value;
 
                 if (!state || !zone || isNaN(v) || isNaN(a) || isNaN(s) || v <= 0) {
-                    this.showError('Please fill all fields with valid numbers');
+                    this.showToast('Please fill all fields with valid numbers');
                     return;
                 }
 
@@ -196,12 +972,23 @@
                 const recommendations = this.getAIRecommendations(riskData.risk, v, a, s);
                 const totalImpact = recommendations.reduce((sum, r) => sum + r.impact, 0);
 
-                this.zones.push({ zone: fullZone, violations: v, accidents: a, speeding: s, ...riskData, recommendations, totalImpact, month });
-                localStorage.setItem('zones', JSON.stringify(this.zones));
+                this.zones.push({ 
+                    zone: fullZone, 
+                    violations: v, 
+                    accidents: a, 
+                    speeding: s, 
+                    ...riskData, 
+                    recommendations, 
+                    totalImpact, 
+                    month 
+                });
                 
-                document.getElementById('dashboard').style.display = 'block';
+                localStorage.setItem('zones', JSON.stringify(this.zones));
+                this.selectedIndex = this.zones.length - 1;
+                
                 this.clearForm();
                 this.updateDashboard();
+                this.showToast('New Safety Zone Added Successfully');
             }
 
             clearForm() {
@@ -209,168 +996,657 @@
                     document.getElementById(id).value = '';
                 });
                 document.getElementById('addBtn').disabled = true;
+                this.updateLivePreview();
             }
 
-            showError(msg) {
-                const preview = document.getElementById('suggestionPreview');
-                preview.textContent = msg;
-                preview.className = 'suggestion-box error';
-                preview.style.display = 'block';
-                setTimeout(() => preview.style.display = 'none', 3000);
+            showToast(msg) {
+                const toast = document.getElementById('toast');
+                document.getElementById('toast-message').textContent = msg;
+                toast.style.display = 'flex';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 3000);
+            }
+
+            selectZone(index) {
+                this.selectedIndex = index;
+                this.updateActiveDisplay();
+                this.update3DParameters();
+                this.updateRecommendationsPanel();
+            }
+
+            updateActiveDisplay() {
+                // Highlight sidebar active items
+                const items = document.querySelectorAll('.zone-item');
+                items.forEach((item, idx) => {
+                    if (idx === this.selectedIndex) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+
+                // Update canvas header overlay
+                const selectedZone = this.zones[this.selectedIndex];
+                const headerSpan = document.getElementById('canvasZoneName');
+                if (selectedZone) {
+                    headerSpan.textContent = selectedZone.zone;
+                    headerSpan.style.color = selectedZone.cls === 'high' ? 'var(--neon-red)' : selectedZone.cls === 'medium' ? 'var(--neon-yellow)' : 'var(--neon-green)';
+                } else {
+                    headerSpan.textContent = 'No Zone Selected';
+                    headerSpan.style.color = '#fff';
+                }
             }
 
             updateDashboard() {
+                this.updateSidebar();
                 this.updateTable();
                 this.updateStats();
-                this.updatePriorityAlert();
                 this.updateCharts();
+                this.updateRecommendationsPanel();
+                this.updateActiveDisplay();
+                this.update3DParameters();
+            }
+
+            updateSidebar() {
+                const list = document.getElementById('sidebarZoneList');
+                list.innerHTML = '';
+                if (this.zones.length === 0) {
+                    list.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; padding: 15px; text-align: center;">No active safety zones.</div>';
+                    return;
+                }
+
+                this.zones.forEach((z, idx) => {
+                    const div = document.createElement('div');
+                    div.className = `zone-item ${idx === this.selectedIndex ? 'active' : ''}`;
+                    div.onclick = () => this.selectZone(idx);
+                    
+                    div.innerHTML = `
+                        <div class="zone-info">
+                            <span class="zone-name">${z.zone}</span>
+                            <span class="zone-meta">${z.month} | ${z.violations} Viols.</span>
+                        </div>
+                        <span class="risk-pill ${z.cls}">${z.risk}</span>
+                    `;
+                    list.appendChild(div);
+                });
             }
 
             updateTable() {
                 const tbody = document.getElementById('zonesTable');
-                const fragment = document.createDocumentFragment();
-                const rows = this.zones.slice(0, 50).map(zone => {
-                    const topRec = zone.recommendations[0];
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${zone.zone}</td>
-                        <td>${zone.violation}</td>
-                        <td>${zone.accidents}</td>
-                        <td>${zone.speeding}</td>
-                        <td class="${zone.cls}">${zone.risk}</td>
-                        <td><strong>${topRec.action}</strong><br><span class="impact">${topRec.time}</span></td>
-                        <td><strong>${zone.totalImpact}%</strong></td>
-                        <td><span class="${topRec.priority.toLowerCase()}">${topRec.priority}</span></td>
-                    `;
-                    return tr;
-                });
-                rows.forEach(tr => fragment.appendChild(tr));
+                if (this.zones.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">No records found. Click "Load Priority Samples" to start.</td></tr>`;
+                    return;
+                }
+
                 tbody.innerHTML = '';
-                tbody.appendChild(fragment);
+                this.zones.forEach((z, index) => {
+                    const tr = document.createElement('tr');
+                    tr.style.cursor = 'pointer';
+                    tr.className = index === this.selectedIndex ? 'active-row' : '';
+                    tr.onclick = () => this.selectZone(index);
+                    
+                    const topRec = z.recommendations[0] || { action: 'Routine Monitoring', time: 'Standard Cycle', priority: 'LOW' };
+                    tr.innerHTML = `
+                        <td><strong>${z.zone}</strong><br><span style="font-size: 0.75rem; color: var(--text-muted);">${z.month}</span></td>
+                        <td>${z.violations}</td>
+                        <td>${z.accidents}</td>
+                        <td>${z.speeding}</td>
+                        <td><span class="risk-pill ${z.cls}">${z.risk}</span></td>
+                        <td><strong style="color: var(--accent-primary);">${z.totalImpact}%</strong></td>
+                        <td><strong>${topRec.action}</strong><br><span style="font-size: 0.75rem; color: var(--text-muted);">${topRec.time}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
             }
 
             updateStats() {
-                const highRiskZones = this.zones.filter(z => z.risk === 'HIGH');
-                const criticalZones = highRiskZones.filter(z => z.recommendations[0].priority === 'CRITICAL');
-                const avgImpact = Math.round(this.zones.reduce((sum, z) => sum + z.totalImpact, 0) / Math.max(this.zones.length, 1));
+                const total = this.zones.length;
+                const highRisk = this.zones.filter(z => z.risk === 'HIGH').length;
+                const criticalCount = this.zones.reduce((acc, z) => acc + z.recommendations.filter(r => r.priority === 'CRITICAL').length, 0);
+                const avgImpact = total > 0 ? Math.round(this.zones.reduce((sum, z) => sum + z.totalImpact, 0) / total) : 0;
 
-                document.getElementById('totalZones').textContent = this.zones.length;
-                document.getElementById('highRisk').textContent = highRiskZones.length;
-                document.getElementById('priorityActions').textContent = criticalZones.length;
+                document.getElementById('totalZones').textContent = total;
+                document.getElementById('highRisk').textContent = highRisk;
+                document.getElementById('priorityActions').textContent = criticalCount;
                 document.getElementById('totalImpact').textContent = avgImpact + '%';
             }
 
-            updatePriorityAlert() {
-                const criticalZones = this.zones.filter(z => z.recommendations[0].priority === 'CRITICAL');
-                const list = document.getElementById('priorityList');
-                if (criticalZones.length > 0) {
-                    list.innerHTML = criticalZones.slice(0, 5).map(z => 
-                        `<div><strong>${z.zone}</strong>: ${z.recommendations[0].action} (${z.recommendations[0].impact}%)</div>`
-                    ).join('');
-                    document.getElementById('priorityAlert').style.display = 'block';
-                } else {
-                    document.getElementById('priorityAlert').style.display = 'none';
+            updateRecommendationsPanel() {
+                const container = document.getElementById('recommendationList');
+                const selected = this.zones[this.selectedIndex];
+                
+                if (!selected) {
+                    container.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 20px;">Select or Add a zone to view intelligent accident prevention recommendations.</div>`;
+                    return;
                 }
+
+                container.innerHTML = selected.recommendations.map(r => `
+                    <div class="rec-item ${r.priority.toLowerCase()}">
+                        <div class="rec-content">
+                            <h4>${r.action}</h4>
+                            <p>${r.time} • Projected reduction: <strong>${r.impact}%</strong></p>
+                        </div>
+                        <span class="rec-badge ${r.priority.toLowerCase()}">${r.priority}</span>
+                    </div>
+                `).join('');
             }
 
             updateCharts() {
                 const riskCtx = document.getElementById('riskChart').getContext('2d');
                 const impactCtx = document.getElementById('impactChart').getContext('2d');
 
+                const high = this.zones.filter(z => z.risk === 'HIGH').length;
+                const med = this.zones.filter(z => z.risk === 'MEDIUM').length;
+                const low = this.zones.filter(z => z.risk === 'LOW').length;
+
+                // Risk Doughnut Chart
                 if (this.chart1) this.chart1.destroy();
                 this.chart1 = new Chart(riskCtx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['HIGH Risk', 'MEDIUM Risk', 'LOW Risk'],
+                        labels: ['Critical (High)', 'Warning (Medium)', 'Safe (Low)'],
                         datasets: [{
-                            data: [
-                                this.zones.filter(z => z.risk === 'HIGH').length,
-                                this.zones.filter(z => z.risk === 'MEDIUM').length,
-                                this.zones.filter(z => z.risk === 'LOW').length
-                            ],
-                            backgroundColor: ['#ef4444', '#facc15', '#22c55e']
+                            data: [high, med, low],
+                            backgroundColor: ['#f43f5e', '#f59e0b', '#10b981'],
+                            borderColor: '#020617',
+                            borderWidth: 2
                         }]
                     },
-                    options: { 
-                        responsive: true, 
+                    options: {
+                        responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { position: 'bottom', labels: { color: '#e5e7eb' } } }
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#f3f4f6', font: { family: 'Outfit', size: 11 } }
+                            }
+                        }
                     }
                 });
 
+                // Safety potential Bar Chart
+                const sortedZones = [...this.zones].slice(0, 6);
                 if (this.chart2) this.chart2.destroy();
                 this.chart2 = new Chart(impactCtx, {
                     type: 'bar',
                     data: {
-                        labels: this.zones.slice(0, 10).map(z => z.zone.slice(0,15) + '...'),
+                        labels: sortedZones.map(z => z.zone.split(' - ')[1] || z.zone),
                         datasets: [{
-                            label: 'Est. Impact %',
-                            data: this.zones.slice(0, 10).map(z => z.totalImpact),
-                            backgroundColor: this.zones.slice(0, 10).map(z => z.cls === 'high' ? '#ef4444' : '#38bdf8')
+                            label: 'Accident Reduction Safety Margin %',
+                            data: sortedZones.map(z => z.totalImpact),
+                            backgroundColor: sortedZones.map(z => z.risk === 'HIGH' ? '#f43f5e' : z.risk === 'MEDIUM' ? '#f59e0b' : '#38bdf8'),
+                            borderRadius: 6
                         }]
                     },
-                    options: { 
-                        responsive: true, 
+                    options: {
+                        responsive: true,
                         maintainAspectRatio: false,
-                        scales: { y: { beginAtZero: true } }
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#9ca3af', font: { family: 'Outfit', size: 9 } }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                max: 150,
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#9ca3af', font: { family: 'Outfit', size: 10 } }
+                            }
+                        }
                     }
                 });
             }
 
             loadSamples() {
-                const state = document.getElementById('state').value || 'Haryana';
+                const sampleStates = ['Maharashtra', 'Karnataka', 'Tamil Nadu', 'Delhi Bypass'];
                 this.zones = [
-                    { zone: `${state} - Emergency Hwy`, violations: 150, accidents: 25, speeding: 120, risk: 'HIGH', cls: 'high', recommendations: AI_RECOMMENDATIONS.HIGH, totalImpact: 135, month: 'Dec 2025' },
-                    { zone: `${state} - Urban Rd`, violations: 80, accidents: 12, speeding: 50, risk: 'MEDIUM', cls: 'medium', recommendations: AI_RECOMMENDATIONS.MEDIUM, totalImpact: 63, month: 'Dec 2025' },
-                    { zone: `${state} - Rural Bypass`, violations: 25, accidents: 2, speeding: 15, risk: 'LOW', cls: 'low', recommendations: AI_RECOMMENDATIONS.LOW, totalImpact: 18, month: 'Dec 2025' }
+                    { zone: `${sampleStates[0]} - NH-4 Mumbai Express`, violations: 210, accidents: 34, speeding: 180, risk: 'HIGH', cls: 'high', recommendations: this.getAIRecommendations('HIGH', 210, 34, 180), totalImpact: 135, month: 'Mar 2026' },
+                    { zone: `${sampleStates[1]} - Electronic City Flyover`, violations: 120, accidents: 15, speeding: 95, risk: 'MEDIUM', cls: 'medium', recommendations: this.getAIRecommendations('MEDIUM', 120, 15, 95), totalImpact: 78, month: 'Mar 2026' },
+                    { zone: `${sampleStates[2]} - OMR Road Sector-3`, violations: 45, accidents: 4, speeding: 25, risk: 'LOW', cls: 'low', recommendations: this.getAIRecommendations('LOW', 45, 4, 25), totalImpact: 18, month: 'Mar 2026' }
                 ];
+                
                 localStorage.setItem('zones', JSON.stringify(this.zones));
+                this.selectedIndex = 0;
                 this.updateDashboard();
+                this.showToast('Priority System Samples Loaded');
             }
 
             exportData() {
-                const csv = 'Zone,Risk,Top Recommendation,Est Impact %,Priority\n' + 
-                    this.zones.map(z => 
-                        `"${z.zone.replace(/"/g, '""')}","${z.risk}","${z.recommendations[0].action.replace(/"/g, '""')}","${z.totalImpact}","${z.recommendations[0].priority}"`
-                    ).join('\n');
+                if (this.zones.length === 0) {
+                    this.showToast('No zone data available to export.');
+                    return;
+                }
+                const csv = 'Zone Details,Risk Level,Accident Reduction %,Primary Action Required,Month\n' + 
+                    this.zones.map(z => {
+                        const rec = z.recommendations[0] ? z.recommendations[0].action : 'Monitoring';
+                        return `"${z.zone.replace(/"/g, '""')}","${z.risk}","${z.totalImpact}%","${rec.replace(/"/g, '""')}","${z.month}"`;
+                    }).join('\n');
+                
                 const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], { type: 'text/csv;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url; 
-                a.download = `accident_prevention_${new Date().toISOString().slice(0,10)}.csv`; 
+                a.download = `safety_portal_actionplan_${new Date().toISOString().slice(0,10)}.csv`; 
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
+                this.showToast('Action Plan Exported to CSV');
+            }
+
+            /* --- THREE.JS SIMULATION SYSTEM --- */
+            initThree() {
+                const container = document.getElementById('three-canvas');
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+
+                // Setup Scene
+                this.three.scene = new THREE.Scene();
+                this.updateSceneBackground();
+
+                // Setup Camera
+                this.three.camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+                this.three.camera.position.set(0, 15, 20);
+
+                // Setup Renderer
+                this.three.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.three.renderer.setSize(width, height);
+                this.three.renderer.shadowMap.enabled = true;
+                this.three.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                container.appendChild(this.three.renderer.domElement);
+
+                // Controls
+                this.three.controls = new THREE.OrbitControls(this.three.camera, this.three.renderer.domElement);
+                this.three.controls.enableDamping = true;
+                this.three.controls.dampingFactor = 0.05;
+                this.three.controls.maxPolarAngle = Math.PI / 2 - 0.05; // Don't go below ground level
+                this.three.controls.minDistance = 5;
+                this.three.controls.maxDistance = 50;
+
+                // Ambient Light
+                this.three.ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
+                this.three.scene.add(this.three.ambientLight);
+
+                // Directional Light
+                this.three.dirLight = new THREE.DirectionalLight(0xffffff, 0.4);
+                this.three.dirLight.position.set(20, 40, 20);
+                this.three.dirLight.castShadow = true;
+                this.three.dirLight.shadow.mapSize.width = 1024;
+                this.three.dirLight.shadow.mapSize.height = 1024;
+                this.three.scene.add(this.three.dirLight);
+
+                // Ground Road Platform
+                const roadGeo = new THREE.BoxGeometry(100, 0.2, 10);
+                const roadMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.8 });
+                this.three.road = new THREE.Mesh(roadGeo, roadMat);
+                this.three.road.receiveShadow = true;
+                this.three.scene.add(this.three.road);
+
+                // Road Center Lines
+                this.addRoadLines();
+
+                // Spawn some decorative light poles
+                this.addLightPoles();
+
+                // Build initial mock traffic flow
+                this.rebuildTraffic(10, 0.15);
+            }
+
+            updateSceneBackground() {
+                if (this.three.isNight) {
+                    this.three.scene.background = new THREE.Color(0x020617);
+                    this.three.scene.fog = new THREE.FogExp2(0x020617, 0.015);
+                    if (this.three.ambientLight) this.three.ambientLight.intensity = 0.1;
+                    if (this.three.dirLight) {
+                        this.three.dirLight.color.setHex(0x38bdf8);
+                        this.three.dirLight.intensity = 0.25;
+                    }
+                } else {
+                    this.three.scene.background = new THREE.Color(0x070b19);
+                    this.three.scene.fog = new THREE.FogExp2(0x070b19, 0.012);
+                    if (this.three.ambientLight) this.three.ambientLight.intensity = 0.5;
+                    if (this.three.dirLight) {
+                        this.three.dirLight.color.setHex(0xffffff);
+                        this.three.dirLight.intensity = 0.9;
+                    }
+                }
+            }
+
+            addRoadLines() {
+                const laneMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const yellowMaterial = new THREE.MeshBasicMaterial({ color: 0xeab308 });
+
+                // Road border lines
+                const border1 = new THREE.Mesh(new THREE.BoxGeometry(100, 0.05, 0.1), laneMaterial);
+                border1.position.set(0, 0.11, 4.8);
+                const border2 = new THREE.Mesh(new THREE.BoxGeometry(100, 0.05, 0.1), laneMaterial);
+                border2.position.set(0, 0.11, -4.8);
+                this.three.scene.add(border1, border2);
+
+                // Dashed lanes
+                for (let x = -50; x <= 50; x += 6) {
+                    const dashLeft = new THREE.Mesh(new THREE.BoxGeometry(3, 0.05, 0.08), yellowMaterial);
+                    dashLeft.position.set(x, 0.11, 1.6);
+                    const dashRight = new THREE.Mesh(new THREE.BoxGeometry(3, 0.05, 0.08), laneMaterial);
+                    dashRight.position.set(x, 0.11, -1.6);
+                    this.three.scene.add(dashLeft, dashRight);
+                }
+            }
+
+            addLightPoles() {
+                for (let x = -40; x <= 40; x += 20) {
+                    this.createLightPole(x, 4.9);
+                    this.createLightPole(x + 10, -4.9);
+                }
+            }
+
+            createLightPole(x, z) {
+                const group = new THREE.Group();
+                group.position.set(x, 0, z);
+
+                // Pole base
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 5, 8), new THREE.MeshStandardMaterial({ color: 0x4b5563, metalness: 0.6 }));
+                base.position.y = 2.5;
+                group.add(base);
+
+                // Pole arm
+                const arm = new THREE.Mesh(new THREE.BoxGeometry(2, 0.1, 0.1), new THREE.MeshStandardMaterial({ color: 0x4b5563 }));
+                arm.position.set(z > 0 ? -0.85 : 0.85, 5, 0);
+                arm.rotation.y = z > 0 ? 0 : Math.PI;
+                group.add(arm);
+
+                // Lamp head
+                const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.15, 0.4), new THREE.MeshStandardMaterial({ color: 0x1f2937 }));
+                lamp.position.set(z > 0 ? -1.8 : 1.8, 4.9, 0);
+                group.add(lamp);
+
+                // Real light source (yellow glowing street light)
+                const pointLight = new THREE.PointLight(0xfef08a, 0.8, 12, 1.5);
+                pointLight.position.set(z > 0 ? -1.8 : 1.8, 4.7, 0);
+                pointLight.castShadow = true;
+                group.add(pointLight);
+
+                // Little mesh cone showing glow source
+                const bulb = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.1, 8), new THREE.MeshBasicMaterial({ color: 0xfef08a }));
+                bulb.position.copy(pointLight.position);
+                bulb.rotation.x = Math.PI;
+                group.add(bulb);
+
+                this.three.scene.add(group);
+            }
+
+            rebuildTraffic(density, baseSpeed) {
+                // Clear old cars
+                this.three.cars.forEach(car => this.three.scene.remove(car));
+                this.three.cars = [];
+
+                const carColors = [0x38bdf8, 0xc084fc, 0x10b981, 0xf59e0b, 0xf43f5e, 0x9ca3af];
+                const lanes = [-3.2, -0.2, 3.2];
+
+                for (let i = 0; i < density; i++) {
+                    const car = this.createCar(carColors[Math.floor(Math.random() * carColors.length)]);
+                    
+                    // Distribute along road length
+                    car.position.x = -45 + (i * (90 / density)) + (Math.random() * 5 - 2.5);
+                    car.position.z = lanes[Math.floor(Math.random() * lanes.length)];
+                    
+                    // Speeds offset slightly for dynamics
+                    car.userData = {
+                        speed: baseSpeed * (0.8 + Math.random() * 0.4),
+                        direction: car.position.z > 0 ? 1 : -1,
+                        lane: car.position.z
+                    };
+
+                    // Point headlights direction
+                    if (car.userData.direction === -1) {
+                        car.rotation.y = Math.PI;
+                    }
+
+                    this.three.scene.add(car);
+                    this.three.cars.push(car);
+                }
+            }
+
+            createCar(colorHex) {
+                const carGroup = new THREE.Group();
+
+                // Lower Body
+                const body = new THREE.Mesh(
+                    new THREE.BoxGeometry(2.5, 0.6, 1.2), 
+                    new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.3, metalness: 0.5 })
+                );
+                body.position.y = 0.45;
+                body.castShadow = true;
+                body.receiveShadow = true;
+                carGroup.add(body);
+
+                // Cockpit Cabin
+                const cabin = new THREE.Mesh(
+                    new THREE.BoxGeometry(1.4, 0.45, 1.0),
+                    new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1 })
+                );
+                cabin.position.set(-0.15, 0.9, 0);
+                cabin.castShadow = true;
+                carGroup.add(cabin);
+
+                // Headlights / Taillights
+                const headGeo = new THREE.BoxGeometry(0.1, 0.15, 0.2);
+                const headlightLeft = new THREE.Mesh(headGeo, new THREE.MeshBasicMaterial({ color: 0xfef08a }));
+                headlightLeft.position.set(1.26, 0.45, -0.4);
+                const headlightRight = headlightLeft.clone();
+                headlightRight.position.z = 0.4;
+                carGroup.add(headlightLeft, headlightRight);
+
+                const tailGeo = new THREE.BoxGeometry(0.1, 0.15, 0.2);
+                const taillightLeft = new THREE.Mesh(tailGeo, new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+                taillightLeft.position.set(-1.26, 0.45, -0.4);
+                const taillightRight = taillightLeft.clone();
+                taillightRight.position.z = 0.4;
+                carGroup.add(taillightLeft, taillightRight);
+
+                // Add headlights spot projection
+                const headlightSpot = new THREE.SpotLight(0xffffff, 1.5, 15, Math.PI / 6, 0.5, 1);
+                headlightSpot.position.set(1.3, 0.45, 0);
+                headlightSpot.target.position.set(6, 0.45, 0);
+                carGroup.add(headlightSpot);
+                carGroup.add(headlightSpot.target);
+
+                // Wheels
+                const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.9 });
+                const wheelGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.25, 12);
+                wheelGeo.rotateX(Math.PI / 2);
+
+                const frontLeft = new THREE.Mesh(wheelGeo, wheelMat);
+                frontLeft.position.set(0.7, 0.3, 0.6);
+                frontLeft.castShadow = true;
+
+                const frontRight = frontLeft.clone();
+                frontRight.position.z = -0.6;
+
+                const backLeft = frontLeft.clone();
+                backLeft.position.x = -0.7;
+
+                const backRight = backLeft.clone();
+                backRight.position.z = -0.6;
+
+                carGroup.add(frontLeft, frontRight, backLeft, backRight);
+
+                return carGroup;
+            }
+
+            update3DParameters() {
+                const selected = this.zones[this.selectedIndex];
+                if (!selected) {
+                    this.rebuildTraffic(8, 0.15);
+                    this.clearHazards();
+                    return;
+                }
+
+                // Map risk stats to traffic speed & density
+                const density = Math.min(18, Math.max(4, Math.round(selected.violations / 15)));
+                const speed = 0.05 + (selected.speeding / 300);
+
+                this.rebuildTraffic(density, speed);
+                this.clearHazards();
+
+                // Add Emergency Hazard visualization if risk is HIGH
+                if (selected.risk === 'HIGH') {
+                    this.spawnAccidentHazard();
+                } else if (selected.risk === 'MEDIUM') {
+                    this.spawnRadarZone();
+                }
+            }
+
+            clearHazards() {
+                this.three.hazardZones.forEach(obj => this.three.scene.remove(obj));
+                this.three.hazardZones = [];
+                this.three.policeLights = [];
+                this.three.policeFlashing = false;
+            }
+
+            spawnRadarZone() {
+                // Spawn a glowing radar gate over the center of the road
+                const radarGroup = new THREE.Group();
+                radarGroup.position.set(10, 0, 0);
+
+                const archGeo = new THREE.BoxGeometry(0.3, 6, 12);
+                const archMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.7 });
+                const arch = new THREE.Mesh(archGeo, archMat);
+                arch.position.y = 3;
+                radarGroup.add(arch);
+
+                // Neon glowing sensor bar
+                const barGeo = new THREE.BoxGeometry(0.5, 0.3, 10);
+                const barMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+                const bar = new THREE.Mesh(barGeo, barMat);
+                bar.position.set(0, 5.8, 0);
+                radarGroup.add(bar);
+
+                this.three.scene.add(radarGroup);
+                this.three.hazardZones.push(radarGroup);
+            }
+
+            spawnAccidentHazard() {
+                const hazardGroup = new THREE.Group();
+                hazardGroup.position.set(15, 0, 3.2); // Parked in outer lane
+
+                // Crashed warning cone / barrier
+                const barrierGeo = new THREE.BoxGeometry(1.5, 0.8, 0.8);
+                const barrierMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b });
+                const barrier = new THREE.Mesh(barrierGeo, barrierMat);
+                barrier.position.y = 0.4;
+                hazardGroup.add(barrier);
+
+                // Police patrol cruiser with active flashers
+                const police = this.createCar(0x1e293b);
+                police.position.set(-3, 0, -0.5);
+                police.rotation.y = Math.PI / 6; // Angle slightly on road side
+                hazardGroup.add(police);
+
+                // Flasher bar on police roof
+                const flasherGeo = new THREE.BoxGeometry(0.3, 0.15, 0.8);
+                const flasherMat = new THREE.MeshBasicMaterial({ color: 0x1f2937 });
+                const flasher = new THREE.Mesh(flasherGeo, flasherMat);
+                flasher.position.set(-3.15, 1.15, -0.5);
+                hazardGroup.add(flasher);
+
+                // Flashing red & blue pointlights
+                const blueLight = new THREE.PointLight(0x0ea5e9, 4, 15, 1.5);
+                blueLight.position.set(-3.15, 1.4, -0.7);
+                hazardGroup.add(blueLight);
+
+                const redLight = new THREE.PointLight(0xf43f5e, 4, 15, 1.5);
+                redLight.position.set(-3.15, 1.4, -0.3);
+                hazardGroup.add(redLight);
+
+                this.three.policeLights.push(blueLight, redLight);
+                this.three.policeFlashing = true;
+
+                this.three.scene.add(hazardGroup);
+                this.three.hazardZones.push(hazardGroup);
+            }
+
+            setCameraView(mode) {
+                this.three.cameraMode = mode;
+                
+                // Reset camera positions based on selection
+                if (mode === 'top') {
+                    this.three.camera.position.set(0, 30, 0.1);
+                    this.three.controls.target.set(0, 0, 0);
+                } else if (mode === 'follow') {
+                    this.three.camera.position.set(-10, 5, 0);
+                } else {
+                    // standard orbit perspective
+                    this.three.camera.position.set(0, 15, 20);
+                    this.three.controls.target.set(0, 0, 0);
+                }
+
+                // Highlight active camera control btn
+                const btns = document.querySelectorAll('.canvas-controls button');
+                btns.forEach(btn => btn.classList.remove('active'));
+                
+                const idx = mode === 'orbit' ? 0 : mode === 'follow' ? 1 : 2;
+                btns[idx].classList.add('active');
+            }
+
+            toggleDayNight() {
+                this.three.isNight = !this.three.isNight;
+                this.updateSceneBackground();
+
+                const moonBtn = document.querySelectorAll('.canvas-controls button')[3];
+                if (this.three.isNight) {
+                    moonBtn.classList.add('active');
+                    moonBtn.innerHTML = '<i class="fas fa-moon"></i>';
+                } else {
+                    moonBtn.classList.remove('active');
+                    moonBtn.innerHTML = '<i class="fas fa-sun"></i>';
+                }
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+
+                // Animate vehicles driving
+                const speedMult = 1.0;
+                this.three.cars.forEach(car => {
+                    car.position.x += car.userData.speed * car.userData.direction * speedMult;
+                    
+                    // Wrap around boundaries
+                    if (car.position.x > 50) {
+                        car.position.x = -50;
+                    } else if (car.position.x < -50) {
+                        car.position.x = 50;
+                    }
+                });
+
+                // Police lights strobe flashing logic
+                if (this.three.policeFlashing && this.three.policeLights.length >= 2) {
+                    this.three.policeLightTimer += 0.15;
+                    const flashVal = Math.sin(this.three.policeLightTimer) > 0;
+                    this.three.policeLights[0].intensity = flashVal ? 5 : 0.1;
+                    this.three.policeLights[1].intensity = flashVal ? 0.1 : 5;
+                }
+
+                // Follow camera view update
+                if (this.three.cameraMode === 'follow' && this.three.cars.length > 0) {
+                    const focusCar = this.three.cars[0]; // lock onto first vehicle
+                    this.three.camera.position.x = focusCar.position.x - 10 * focusCar.userData.direction;
+                    this.three.camera.position.z = focusCar.position.z + 4;
+                    this.three.camera.position.y = 3.5;
+                    this.three.controls.target.copy(focusCar.position);
+                }
+
+                this.three.controls.update();
+                this.three.renderer.render(this.three.scene, this.three.camera);
             }
         }
 
-        const AI_RECOMMENDATIONS = {
-            HIGH: [
-                { action: 'Install AI Speed Cameras (24x7)', impact: 45, time: '1 week', priority: 'CRITICAL' },
-                { action: 'Deploy Dedicated Patrol Teams', impact: 35, time: 'Immediate', priority: 'HIGH' },
-                { action: 'Emergency Road Resurfacing', impact: 25, time: '2 weeks', priority: 'HIGH' },
-                { action: 'AI Predictive Hotspot Monitoring', impact: 30, time: '3 days', priority: 'MEDIUM' }
-            ],
-            MEDIUM: [
-                { action: 'Install Warning Signage + Rumblers', impact: 25, time: '1 week', priority: 'MEDIUM' },
-                { action: 'Traffic Signal Optimization', impact: 20, time: '2 weeks', priority: 'MEDIUM' },
-                { action: 'Speed Feedback Displays', impact: 18, time: '5 days', priority: 'LOW' },
-                { action: 'Enhanced Road Markings', impact: 15, time: '1 week', priority: 'LOW' }
-            ],
-            LOW: [
-                { action: 'Routine Monitoring + Data Collection', impact: 10, time: 'Ongoing', priority: 'LOW' },
-                { action: 'Community Awareness Campaigns', impact: 8, time: 'Monthly', priority: 'LOW' }
-            ]
-        };
-
-        // Initialize app
+        // Initialize instance
         const app = new TrafficAnalytics();
-
-        // Expose methods globally for onclick handlers
-        window.addZone = () => app.addZone();
-        window.loadSamples = () => app.loadSamples();
-        window.exportData = () => app.exportData();
     </script>
 </body>
 </html>
