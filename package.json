@@ -1,0 +1,12 @@
+{
+  "name": "traffic-analytics-3d",
+  "version": "1.0.0",
+  "description": "Smart Traffic Analytics Pro with Three.js 3D visualization and real-time accident fetching",
+  "main": "index.html",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  }
+}

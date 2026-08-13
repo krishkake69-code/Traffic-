@@ -639,6 +639,7 @@
             </div>
         </div>
         <div class="header-actions">
+            <button class="btn" id="liveSyncBtn" onclick="app.toggleLiveSync()"><i class="fas fa-satellite-dish"></i> Start Live Sync</button>
             <button class="btn" onclick="app.loadSamples()"><i class="fas fa-folder-open"></i> Load Priority Samples</button>
             <button class="btn btn-primary" onclick="app.exportData()"><i class="fas fa-file-export"></i> Export CSV Action Plan</button>
         </div>
@@ -833,7 +834,9 @@
         <span id="toast-message">Action Complete</span>
     </div>
 
-    <script>
+    <script type="module">
+        import { TrafficService } from './dist/traffic-service.js';
+
         // Global recommendations library
         const AI_RECOMMENDATIONS = {
             HIGH: [
@@ -861,6 +864,10 @@
                 this.chart1 = null;
                 this.chart2 = null;
                 
+                // TypeScript Service State
+                this.trafficService = new TrafficService();
+                this.isLiveSyncing = false;
+
                 // Three.js State variables
                 this.three = {
                     scene: null,
@@ -904,10 +911,13 @@
             bindEvents() {
                 const inputs = ['state', 'zone', 'violations', 'accidents', 'speeding'];
                 inputs.forEach(id => {
-                    document.getElementById(id).addEventListener('input', () => {
-                        this.validateForm();
-                        this.updateLivePreview();
-                    });
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.addEventListener('input', () => {
+                            this.validateForm();
+                            this.updateLivePreview();
+                        });
+                    }
                 });
             }
 
@@ -918,7 +928,9 @@
                 const a = parseInt(document.getElementById('accidents').value) || 0;
                 const s = parseInt(document.getElementById('speeding').value) || 0;
                 const btn = document.getElementById('addBtn');
-                btn.disabled = !state || !zone || v <= 0 || a < 0 || s < 0;
+                if (btn) {
+                    btn.disabled = !state || !zone || v <= 0 || a < 0 || s < 0;
+                }
             }
 
             updateLivePreview() {
@@ -928,15 +940,17 @@
                 const score = (v * 0.4 + a * 0.4 + s * 0.2) / 10;
                 
                 const label = document.getElementById('liveRiskLabel');
-                if (score >= 8) {
-                    label.textContent = 'HIGH';
-                    label.className = 'risk-pill high';
-                } else if (score >= 4) {
-                    label.textContent = 'MEDIUM';
-                    label.className = 'risk-pill medium';
-                } else {
-                    label.textContent = 'LOW';
-                    label.className = 'risk-pill low';
+                if (label) {
+                    if (score >= 8) {
+                        label.textContent = 'HIGH';
+                        label.className = 'risk-pill high';
+                    } else if (score >= 4) {
+                        label.textContent = 'MEDIUM';
+                        label.className = 'risk-pill medium';
+                    } else {
+                        label.textContent = 'LOW';
+                        label.className = 'risk-pill low';
+                    }
                 }
             }
 
@@ -993,19 +1007,23 @@
 
             clearForm() {
                 ['state', 'zone', 'violations', 'accidents', 'speeding'].forEach(id => {
-                    document.getElementById(id).value = '';
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
                 });
-                document.getElementById('addBtn').disabled = true;
+                const btn = document.getElementById('addBtn');
+                if (btn) btn.disabled = true;
                 this.updateLivePreview();
             }
 
             showToast(msg) {
                 const toast = document.getElementById('toast');
-                document.getElementById('toast-message').textContent = msg;
-                toast.style.display = 'flex';
-                setTimeout(() => {
-                    toast.style.display = 'none';
-                }, 3000);
+                if (toast) {
+                    document.getElementById('toast-message').textContent = msg;
+                    toast.style.display = 'flex';
+                    setTimeout(() => {
+                        toast.style.display = 'none';
+                    }, 3000);
+                }
             }
 
             selectZone(index) {
@@ -1029,12 +1047,14 @@
                 // Update canvas header overlay
                 const selectedZone = this.zones[this.selectedIndex];
                 const headerSpan = document.getElementById('canvasZoneName');
-                if (selectedZone) {
-                    headerSpan.textContent = selectedZone.zone;
-                    headerSpan.style.color = selectedZone.cls === 'high' ? 'var(--neon-red)' : selectedZone.cls === 'medium' ? 'var(--neon-yellow)' : 'var(--neon-green)';
-                } else {
-                    headerSpan.textContent = 'No Zone Selected';
-                    headerSpan.style.color = '#fff';
+                if (headerSpan) {
+                    if (selectedZone) {
+                        headerSpan.textContent = selectedZone.zone;
+                        headerSpan.style.color = selectedZone.cls === 'high' ? 'var(--neon-red)' : selectedZone.cls === 'medium' ? 'var(--neon-yellow)' : 'var(--neon-green)';
+                    } else {
+                        headerSpan.textContent = 'No Zone Selected';
+                        headerSpan.style.color = '#fff';
+                    }
                 }
             }
 
@@ -1050,6 +1070,7 @@
 
             updateSidebar() {
                 const list = document.getElementById('sidebarZoneList');
+                if (!list) return;
                 list.innerHTML = '';
                 if (this.zones.length === 0) {
                     list.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; padding: 15px; text-align: center;">No active safety zones.</div>';
@@ -1074,6 +1095,7 @@
 
             updateTable() {
                 const tbody = document.getElementById('zonesTable');
+                if (!tbody) return;
                 if (this.zones.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">No records found. Click "Load Priority Samples" to start.</td></tr>`;
                     return;
@@ -1106,14 +1128,20 @@
                 const criticalCount = this.zones.reduce((acc, z) => acc + z.recommendations.filter(r => r.priority === 'CRITICAL').length, 0);
                 const avgImpact = total > 0 ? Math.round(this.zones.reduce((sum, z) => sum + z.totalImpact, 0) / total) : 0;
 
-                document.getElementById('totalZones').textContent = total;
-                document.getElementById('highRisk').textContent = highRisk;
-                document.getElementById('priorityActions').textContent = criticalCount;
-                document.getElementById('totalImpact').textContent = avgImpact + '%';
+                const tEl = document.getElementById('totalZones');
+                const hrEl = document.getElementById('highRisk');
+                const paEl = document.getElementById('priorityActions');
+                const tiEl = document.getElementById('totalImpact');
+
+                if (tEl) tEl.textContent = total;
+                if (hrEl) hrEl.textContent = highRisk;
+                if (paEl) paEl.textContent = criticalCount;
+                if (tiEl) tiEl.textContent = avgImpact + '%';
             }
 
             updateRecommendationsPanel() {
                 const container = document.getElementById('recommendationList');
+                if (!container) return;
                 const selected = this.zones[this.selectedIndex];
                 
                 if (!selected) {
@@ -1133,8 +1161,12 @@
             }
 
             updateCharts() {
-                const riskCtx = document.getElementById('riskChart').getContext('2d');
-                const impactCtx = document.getElementById('impactChart').getContext('2d');
+                const riskEl = document.getElementById('riskChart');
+                const impactEl = document.getElementById('impactChart');
+                if (!riskEl || !impactEl) return;
+
+                const riskCtx = riskEl.getContext('2d');
+                const impactCtx = impactEl.getContext('2d');
 
                 const high = this.zones.filter(z => z.risk === 'HIGH').length;
                 const med = this.zones.filter(z => z.risk === 'MEDIUM').length;
@@ -1238,9 +1270,73 @@
                 this.showToast('Action Plan Exported to CSV');
             }
 
+            /* --- REAL-TIME DATA SYNC --- */
+            toggleLiveSync() {
+                this.isLiveSyncing = !this.isLiveSyncing;
+                const btn = document.getElementById('liveSyncBtn');
+                if (!btn) return;
+
+                if (this.isLiveSyncing) {
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sync Active';
+                    btn.style.borderColor = 'var(--neon-green)';
+                    btn.style.color = 'var(--neon-green)';
+                    this.showToast("Real-time live incident sync activated");
+                    
+                    this.trafficService.startLiveSync((incidents) => {
+                        this.handleLiveIncidents(incidents);
+                    }, 8000);
+                } else {
+                    btn.innerHTML = '<i class="fas fa-satellite-dish"></i> Start Live Sync';
+                    btn.style.borderColor = 'var(--border-glow)';
+                    btn.style.color = 'var(--text-main)';
+                    this.trafficService.stopLiveSync();
+                    this.showToast("Live Sync Paused");
+                }
+            }
+
+            handleLiveIncidents(incidents) {
+                if (!incidents || incidents.length === 0) return;
+
+                let addedCount = 0;
+                incidents.forEach(inc => {
+                    const exists = this.zones.some(z => z.zone === inc.roadName);
+                    if (!exists) {
+                        const score = (inc.type === 'Accident') ? 'HIGH' : (inc.type === 'Speeding') ? 'MEDIUM' : 'LOW';
+                        const riskData = {
+                            risk: inc.severity,
+                            cls: inc.severity.toLowerCase()
+                        };
+                        const recommendations = this.getAIRecommendations(riskData.risk, inc.speedKmh, inc.type === 'Accident' ? 10 : 0, 20);
+                        const totalImpact = recommendations.reduce((sum, r) => sum + r.impact, 0);
+
+                        this.zones.unshift({
+                            zone: inc.roadName,
+                            violations: inc.type === 'Speeding' ? 140 : 40,
+                            accidents: inc.type === 'Accident' ? 12 : 0,
+                            speeding: inc.type === 'Speeding' ? 95 : 15,
+                            risk: riskData.risk,
+                            cls: riskData.cls,
+                            recommendations: recommendations,
+                            totalImpact: totalImpact,
+                            month: 'Live Feed'
+                        });
+                        addedCount++;
+                    }
+                });
+
+                if (addedCount > 0) {
+                    this.zones = this.zones.slice(0, 50);
+                    localStorage.setItem('zones', JSON.stringify(this.zones));
+                    this.selectedIndex = 0;
+                    this.updateDashboard();
+                    this.showToast(`Sync: Loaded ${addedCount} new incident reports`);
+                }
+            }
+
             /* --- THREE.JS SIMULATION SYSTEM --- */
             initThree() {
                 const container = document.getElementById('three-canvas');
+                if (!container) return;
                 const width = container.clientWidth;
                 const height = container.clientHeight;
 
@@ -1647,6 +1743,7 @@
 
         // Initialize instance
         const app = new TrafficAnalytics();
+        window.app = app;
     </script>
 </body>
 </html>
